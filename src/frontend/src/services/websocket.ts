@@ -3,6 +3,7 @@ export type ConnectionStatus = "connected" | "connecting" | "disconnected";
 export interface WSMessage {
   type: string;
   message: string;
+  documentMarkdown?: string;
 }
 
 type MessageHandler = (msg: WSMessage) => void;

@@ -12,8 +12,8 @@ export function useWebSocket() {
     };
   }, []);
 
-  const sendMessage = useCallback((message: string) => {
-    wsService.send({ type: "chat", message });
+  const sendMessage = useCallback((message: string, documentMarkdown?: string) => {
+    wsService.send({ type: "chat", message, documentMarkdown });
   }, []);
 
   const sendGenerateTutorial = useCallback((interviewJson: string) => {

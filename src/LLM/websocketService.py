@@ -64,6 +64,8 @@ async def handle_client(websocket, path):
         return
 
     llm = LLM()
+    # Store document markdown per connection (not yet used in LLM calls)
+    document_markdown = None
     
     try:
         async for message in websocket:
@@ -80,6 +82,10 @@ async def handle_client(websocket, path):
                 # Handle chat messages
                 if data["type"] == "chat":
                     user_message = data["message"]
+                    # Extract document markdown if provided (not yet used in LLM calls)
+                    document_markdown = data.get("documentMarkdown")
+                    if document_markdown:
+                        logger.info(f"Received document markdown ({len(document_markdown)} chars), stored but not yet used in LLM calls")
                     logger.info(f"Processing chat message: {user_message}")
                     
                     # Send response start signal
