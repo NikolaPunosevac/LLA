@@ -8,7 +8,7 @@ import DocumentEditor from "@/components/DocumentEditor";
 import { useWebSocket } from "@/hooks/useWebSocket";
 
 const Home = () => {
-  const { status, sendMessage, onMessage } = useWebSocket();
+  const { status, sendMessage, sendGenerateTutorial, onMessage } = useWebSocket();
   const [files, setFiles] = useState<DocFile[]>([]);
   const [activeFile, setActiveFile] = useState<string | null>(null);
   const [docContent, setDocContent] = useState("");
@@ -87,7 +87,7 @@ const Home = () => {
         </div>
         {/* Chat Panel - 30% */}
         <div className="lg:w-[30%] w-full h-[350px] lg:h-auto border-b lg:border-b-0 lg:border-r overflow-hidden">
-          <ChatPanel sendMessage={sendMessage} onMessage={onMessage} />
+          <ChatPanel sendMessage={sendMessage} sendGenerateTutorial={sendGenerateTutorial} onMessage={onMessage} />
         </div>
         {/* Document Editor - 50% */}
         <div className="lg:w-[50%] w-full flex-1 lg:flex-none lg:h-auto overflow-hidden">

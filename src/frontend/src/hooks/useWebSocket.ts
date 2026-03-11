@@ -16,9 +16,13 @@ export function useWebSocket() {
     wsService.send({ type: "chat", message });
   }, []);
 
+  const sendGenerateTutorial = useCallback((interviewJson: string) => {
+    wsService.send({ type: "generate_tutorial", message: interviewJson });
+  }, []);
+
   const onMessage = useCallback((handler: (msg: WSMessage) => void) => {
     return wsService.onMessage(handler);
   }, []);
 
-  return { status, sendMessage, onMessage };
+  return { status, sendMessage, sendGenerateTutorial, onMessage };
 }

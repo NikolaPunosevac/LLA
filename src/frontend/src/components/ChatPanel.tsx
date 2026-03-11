@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { flushSync } from "react-dom";
-import { Trash2 } from "lucide-react";
+import { Trash2, FileUp } from "lucide-react";
 import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
 import type { WSMessage } from "@/services/websocket";
@@ -13,10 +13,11 @@ interface Message {
 
 interface ChatPanelProps {
   sendMessage: (msg: string) => void;
+  sendGenerateTutorial: (json: string) => void;
   onMessage: (handler: (msg: WSMessage) => void) => () => void;
 }
 
-const ChatPanel = ({ sendMessage, onMessage }: ChatPanelProps) => {
+const ChatPanel = ({ sendMessage, sendGenerateTutorial, onMessage }: ChatPanelProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -74,6 +75,12 @@ const ChatPanel = ({ sendMessage, onMessage }: ChatPanelProps) => {
         console.log("Stream ended, final content length:", streamingContentRef.current.length);
         streamingMessageIdRef.current = null;
         streamingContentRef.current = "";
+      } else if (msg.type === "tutorial_error") {
+        setIsTyping(false);
+        setMessages((prev) => [
+          ...prev,
+          { id: crypto.randomUUID(), role: "ai", content: `**Napaka:** ${msg.message}` },
+        ]);
       } else if (msg.type === "response") {
         // Fallback for non-streaming responses (backward compatibility)
         setIsTyping(false);
@@ -98,6 +105,24 @@ const ChatPanel = ({ sendMessage, onMessage }: ChatPanelProps) => {
     [sendMessage]
   );
 
+  const handleUploadJson = useCallback(() => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      const text = await file.text();
+      setMessages((prev) => [
+        ...prev,
+        { id: crypto.randomUUID(), role: "user", content: `Generiraj tutorial iz **${file.name}**` },
+      ]);
+      setIsTyping(true);
+      sendGenerateTutorial(text);
+    };
+    input.click();
+  }, [sendGenerateTutorial]);
+
   const clearChat = () => {
     setMessages([]);
     setIsTyping(false);
@@ -109,13 +134,22 @@ const ChatPanel = ({ sendMessage, onMessage }: ChatPanelProps) => {
     <div className="flex flex-col h-full bg-card">
       <div className="flex items-center justify-between px-4 py-3 border-b">
         <h2 className="text-sm font-semibold text-foreground">AI Assistant</h2>
-        <button
-          onClick={clearChat}
-          className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors duration-150"
-          title="Clear chat"
-        >
-          <Trash2 className="h-4 w-4" />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={handleUploadJson}
+            className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors duration-150"
+            title="Generate tutorial from JSON"
+          >
+            <FileUp className="h-4 w-4" />
+          </button>
+          <button
+            onClick={clearChat}
+            className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors duration-150"
+            title="Clear chat"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
       </div>
       <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-thin p-4 space-y-3">
         {messages.length === 0 && (

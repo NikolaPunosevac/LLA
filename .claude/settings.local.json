@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /c/Users/Uporabnik/Documents/programiranje/LLA -type d -not -path */.* -not -path */node_modules* -not -path */__pycache__*)",
+      "Bash(python -m pytest tests/test_generate_tutorial.py -q)"
+    ]
+  }
+}

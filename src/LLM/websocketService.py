@@ -1,9 +1,15 @@
 import asyncio
 import json
 import logging
+import sys
+from pathlib import Path
 from websockets.server import serve
 from websockets.exceptions import ConnectionClosed
 from LLMclass import LLM
+
+# Allow importing generate_tutorial from sibling directory
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from generate_tutorial import generate_tutorial_text
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -97,6 +103,44 @@ async def handle_client(websocket, path):
                     await websocket.send(json.dumps(end_response))
                     logger.info("Sent response_end signal")
                     
+                elif data["type"] == "generate_tutorial":
+                    # Generate a step-by-step tutorial from interview JSON
+                    raw = data["message"]
+                    logger.info("Processing generate_tutorial request")
+
+                    try:
+                        interview_data = json.loads(raw) if isinstance(raw, str) else raw
+                        tutorial_md = generate_tutorial_text(interview_data)
+                    except (json.JSONDecodeError, KeyError, TypeError) as e:
+                        error_response = {
+                            "type": "tutorial_error",
+                            "message": f"Napaka pri obdelavi JSON: {e}"
+                        }
+                        await websocket.send(json.dumps(error_response))
+                        logger.error(f"Tutorial generation failed: {e}")
+                        continue
+
+                    # Stream the tutorial using the same protocol as chat
+                    await websocket.send(json.dumps({
+                        "type": "response_start",
+                        "message": ""
+                    }))
+
+                    # Send in line-sized chunks for a streaming feel
+                    for line in tutorial_md.split("\n"):
+                        chunk_response = {
+                            "type": "response_chunk",
+                            "message": line + "\n"
+                        }
+                        await websocket.send(json.dumps(chunk_response))
+                        await asyncio.sleep(0.001)
+
+                    await websocket.send(json.dumps({
+                        "type": "response_end",
+                        "message": ""
+                    }))
+                    logger.info("Tutorial sent successfully")
+
                 else:
                     logger.warning(f"Unknown message type: {data['type']}")
                     
