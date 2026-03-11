@@ -1,0 +1,1116 @@
+{
+  "template_name": "Pogodba o varovanju zaupnih informacij (NDA)",
+  "language": "sl",
+  "output_formats": ["pdf", "docx"],
+  "pages": [
+    {
+      "page_id": "page_splosno",
+      "title": "Splošni podatki pogodbe",
+      "description": "Določite osnovne parametre pogodbe – kdaj se sklepa, kakšen tip NDA je in kakšen je namen sodelovanja.",
+      "order": 1,
+      "show_if": null
+    },
+    {
+      "page_id": "page_razkrivajoca",
+      "title": "Razkrivající stranka",
+      "description": "Vnesite podatke o stranki, ki bo zaupne informacije posredovala drugi strani. Podatke vnesite točno tako, kot so vpisani v sodni register.",
+      "order": 2,
+      "show_if": null
+    },
+    {
+      "page_id": "page_prejemajoca",
+      "title": "Prejemající stranka",
+      "description": "Vnesite podatke o stranki, ki bo zaupne informacije prejemala in se zavezala k njihovemu varovanju.",
+      "order": 3,
+      "show_if": null
+    },
+    {
+      "page_id": "page_kontakti",
+      "title": "Kontaktne osebe",
+      "description": "Navedite osebe, ki bodo skrbele za izvajanje pogodbe ali bodo imele dostop do zaupnih informacij. Vsaj ena kontaktna oseba je obvezna.",
+      "order": 4,
+      "show_if": null
+    },
+    {
+      "page_id": "page_zaupne_info",
+      "title": "Zaupne informacije",
+      "description": "Natančno opredelite, katere vrste informacij so predmet varovanja. Bolj konkretne kot so kategorije, bolj je pogodba izvršljiva.",
+      "order": 5,
+      "show_if": null
+    },
+    {
+      "page_id": "page_trajanje",
+      "title": "Trajanje in prenehanje",
+      "description": "Določite, kako dolgo bo pogodba veljala in kaj se zgodi po njenem izteku.",
+      "order": 6,
+      "show_if": null
+    },
+    {
+      "page_id": "page_digitalna_varnost",
+      "title": "Digitalna varnost",
+      "description": "To stran izpolnite, kadar zaupne informacije vključujejo digitalne podatke, programsko kodo ali dostope do sistemov.",
+      "order": 7,
+      "show_if": {
+        "logic": "and",
+        "conditions": [
+          {
+            "variable": "zahteve_digitalne_varnosti",
+            "operator": "equals",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "page_id": "page_podizvajalci",
+      "title": "Podizvajalci in tretje osebe",
+      "description": "Določite, ali sme prejemající stranka zaupne informacije posredovati svojim podizvajalcem ali zunanjim svetovalcem.",
+      "order": 8,
+      "show_if": null
+    },
+    {
+      "page_id": "page_seznam_podizvajalcev",
+      "title": "Seznam dovoljenih podizvajalcev",
+      "description": "Navedite vse podizvajalce, ki smejo imeti dostop do zaupnih informacij. Za vsakega vpišite naziv in razlog dostopa.",
+      "order": 9,
+      "show_if": {
+        "logic": "and",
+        "conditions": [
+          {
+            "variable": "dovoli_podizvajalce",
+            "operator": "equals",
+            "value": true
+          }
+        ]
+      }
+    },
+    {
+      "page_id": "page_sankcije",
+      "title": "Sankcije in odgovornost",
+      "description": "Določite finančne posledice kršitve pogodbe. Priporočamo lestvico po stopnjah resnosti kršitve.",
+      "order": 10,
+      "show_if": null
+    },
+    {
+      "page_id": "page_spori",
+      "title": "Reševanje sporov in merodajno pravo",
+      "description": "Izberite, kako bosta stranki reševali morebitne spore, in določite merodajno pravo.",
+      "order": 11,
+      "show_if": null
+    },
+    {
+      "page_id": "page_podpisi",
+      "title": "Posebne določbe in podpisi",
+      "description": "Konfigurirajte formalne vidike podpisa in vpišite morebitne dodatne dogovore.",
+      "order": 12,
+      "show_if": null
+    },
+    {
+      "page_id": "page_priloge",
+      "title": "Priloge",
+      "description": "Kadar pogodba sama po sebi ni dovolj za natančno opredelitev predmeta varovanja, dodajte eno ali več prilog.",
+      "order": 13,
+      "show_if": null
+    }
+  ],
+  "variables": [
+    {
+      "variable_name": "datum_sklenitve",
+      "page_id": "page_splosno",
+      "order": 1,
+      "type": "date",
+      "label": "Datum sklenitve pogodbe",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "date_format": "d. MMMM yyyy",
+        "locale": "sl"
+      }
+    },
+    {
+      "variable_name": "tip_nda",
+      "page_id": "page_splosno",
+      "order": 2,
+      "type": "select",
+      "label": "Tip NDA",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "display_type": "radio",
+        "options": [
+          {
+            "label": "Enostranska – zaupne informacije razkriva samo ena stranka",
+            "value": "enostranska"
+          },
+          {
+            "label": "Obojestranska – obe stranki si vzajemno izmenjujeta zaupne informacije",
+            "value": "obojestranska"
+          }
+        ]
+      }
+    },
+    {
+      "variable_name": "namen_sodelovanja",
+      "page_id": "page_splosno",
+      "order": 3,
+      "type": "text",
+      "label": "Namen sodelovanja",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "multiline": true,
+        "min_length": 10,
+        "max_length": 500
+      }
+    },
+    {
+      "variable_name": "ima_kodno_ime",
+      "page_id": "page_splosno",
+      "order": 4,
+      "type": "yes_no",
+      "label": "Ali ima projekt interno kodno ime?",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "yes_label": "Da, ima kodno ime",
+        "no_label": "Ne"
+      }
+    },
+    {
+      "variable_name": "projekt_kodno_ime",
+      "page_id": "page_splosno",
+      "order": 5,
+      "type": "text",
+      "label": "Kodno ime projekta",
+      "required": true,
+      "show_if": {
+        "logic": "and",
+        "conditions": [
+          { "variable": "ima_kodno_ime", "operator": "equals", "value": true }
+        ]
+      },
+      "hide_if": null,
+      "settings": {
+        "multiline": false,
+        "min_length": null,
+        "max_length": 100
+      }
+    },
+
+    {
+      "variable_name": "razkrivajoca_stranka_naziv",
+      "page_id": "page_razkrivajoca",
+      "order": 1,
+      "type": "text",
+      "label": "Naziv razkrivající stranke",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "multiline": false,
+        "min_length": null,
+        "max_length": 200
+      }
+    },
+    {
+      "variable_name": "razkrivajoca_stranka_naslov",
+      "page_id": "page_razkrivajoca",
+      "order": 2,
+      "type": "text",
+      "label": "Naslov sedeža razkrivající stranke",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "multiline": false,
+        "min_length": null,
+        "max_length": 300
+      }
+    },
+    {
+      "variable_name": "razkrivajoca_je_pravna_oseba",
+      "page_id": "page_razkrivajoca",
+      "order": 3,
+      "type": "yes_no",
+      "label": "Ali je razkrivající stranka pravna oseba (d.o.o., d.d. ipd.)?",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "yes_label": "Da, pravna oseba",
+        "no_label": "Ne, fizična oseba ali s.p."
+      }
+    },
+    {
+      "variable_name": "razkrivajoca_stranka_maticna",
+      "page_id": "page_razkrivajoca",
+      "order": 4,
+      "type": "text",
+      "label": "Matična številka razkrivající stranke",
+      "required": true,
+      "show_if": {
+        "logic": "and",
+        "conditions": [
+          {
+            "variable": "razkrivajoca_je_pravna_oseba",
+            "operator": "equals",
+            "value": true
+          }
+        ]
+      },
+      "hide_if": null,
+      "settings": {
+        "multiline": false,
+        "min_length": 10,
+        "max_length": 10
+      }
+    },
+    {
+      "variable_name": "razkrivajoca_stranka_ddv",
+      "page_id": "page_razkrivajoca",
+      "order": 5,
+      "type": "text",
+      "label": "DDV ID razkrivající stranke",
+      "required": false,
+      "show_if": {
+        "logic": "and",
+        "conditions": [
+          {
+            "variable": "razkrivajoca_je_pravna_oseba",
+            "operator": "equals",
+            "value": true
+          }
+        ]
+      },
+      "hide_if": null,
+      "settings": {
+        "multiline": false,
+        "min_length": null,
+        "max_length": 12
+      }
+    },
+    {
+      "variable_name": "email_razkrivajoca",
+      "page_id": "page_razkrivajoca",
+      "order": 6,
+      "type": "text",
+      "label": "E-pošta razkrivající stranke (za uradno korespondenco)",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "multiline": false,
+        "min_length": null,
+        "max_length": 200
+      }
+    },
+    {
+      "variable_name": "datum_podpis_razkrivajoca",
+      "page_id": "page_razkrivajoca",
+      "order": 7,
+      "type": "date",
+      "label": "Datum podpisa razkrivající stranke",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "date_format": "d. MMMM yyyy",
+        "locale": "sl"
+      }
+    },
+
+    {
+      "variable_name": "prejemajoca_stranka_naziv",
+      "page_id": "page_prejemajoca",
+      "order": 1,
+      "type": "text",
+      "label": "Naziv prejemající stranke",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "multiline": false,
+        "min_length": null,
+        "max_length": 200
+      }
+    },
+    {
+      "variable_name": "prejemajoca_stranka_naslov",
+      "page_id": "page_prejemajoca",
+      "order": 2,
+      "type": "text",
+      "label": "Naslov sedeža prejemající stranke",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "multiline": false,
+        "min_length": null,
+        "max_length": 300
+      }
+    },
+    {
+      "variable_name": "prejemajoca_je_pravna_oseba",
+      "page_id": "page_prejemajoca",
+      "order": 3,
+      "type": "yes_no",
+      "label": "Ali je prejemající stranka pravna oseba (d.o.o., d.d. ipd.)?",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "yes_label": "Da, pravna oseba",
+        "no_label": "Ne, fizična oseba ali s.p."
+      }
+    },
+    {
+      "variable_name": "prejemajoca_stranka_maticna",
+      "page_id": "page_prejemajoca",
+      "order": 4,
+      "type": "text",
+      "label": "Matična številka prejemající stranke",
+      "required": true,
+      "show_if": {
+        "logic": "and",
+        "conditions": [
+          {
+            "variable": "prejemajoca_je_pravna_oseba",
+            "operator": "equals",
+            "value": true
+          }
+        ]
+      },
+      "hide_if": null,
+      "settings": {
+        "multiline": false,
+        "min_length": 10,
+        "max_length": 10
+      }
+    },
+    {
+      "variable_name": "prejemajoca_stranka_ddv",
+      "page_id": "page_prejemajoca",
+      "order": 5,
+      "type": "text",
+      "label": "DDV ID prejemající stranke",
+      "required": false,
+      "show_if": {
+        "logic": "and",
+        "conditions": [
+          {
+            "variable": "prejemajoca_je_pravna_oseba",
+            "operator": "equals",
+            "value": true
+          }
+        ]
+      },
+      "hide_if": null,
+      "settings": {
+        "multiline": false,
+        "min_length": null,
+        "max_length": 12
+      }
+    },
+    {
+      "variable_name": "email_prejemajoca",
+      "page_id": "page_prejemajoca",
+      "order": 6,
+      "type": "text",
+      "label": "E-pošta prejemající stranke (za uradno korespondenco)",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "multiline": false,
+        "min_length": null,
+        "max_length": 200
+      }
+    },
+    {
+      "variable_name": "datum_podpis_prejemajoca",
+      "page_id": "page_prejemajoca",
+      "order": 7,
+      "type": "date",
+      "label": "Datum podpisa prejemající stranke",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "date_format": "d. MMMM yyyy",
+        "locale": "sl"
+      }
+    },
+
+    {
+      "variable_name": "kontaktne_osebe",
+      "page_id": "page_kontakti",
+      "order": 1,
+      "type": "list",
+      "label": "Kontaktne osebe",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "min_items": 1,
+        "max_items": null,
+        "attributes": [
+          {
+            "attribute_name": "ime_priimek",
+            "label": "Ime in priimek",
+            "type": "text",
+            "required": true,
+            "settings": {
+              "multiline": false,
+              "min_length": null,
+              "max_length": 100
+            }
+          },
+          {
+            "attribute_name": "funkcija",
+            "label": "Funkcija / naziv (npr. direktor, vodja projekta)",
+            "type": "text",
+            "required": true,
+            "settings": {
+              "multiline": false,
+              "min_length": null,
+              "max_length": 100
+            }
+          },
+          {
+            "attribute_name": "email",
+            "label": "E-pošta",
+            "type": "text",
+            "required": true,
+            "settings": {
+              "multiline": false,
+              "min_length": null,
+              "max_length": 200
+            }
+          },
+          {
+            "attribute_name": "telefon",
+            "label": "Telefonska številka",
+            "type": "text",
+            "required": false,
+            "settings": {
+              "multiline": false,
+              "min_length": null,
+              "max_length": 30
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "variable_name": "kategorije_zaupnih_informacij",
+      "page_id": "page_zaupne_info",
+      "order": 1,
+      "type": "list",
+      "label": "Kategorije zaupnih informacij",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "min_items": 1,
+        "max_items": null,
+        "attributes": [
+          {
+            "attribute_name": "naziv",
+            "label": "Kategorija (npr. Izvorna koda, Poslovni načrti, Seznam strank)",
+            "type": "text",
+            "required": true,
+            "settings": {
+              "multiline": false,
+              "min_length": null,
+              "max_length": 200
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "variable_name": "obdobje_varovanja",
+      "page_id": "page_trajanje",
+      "order": 1,
+      "type": "number",
+      "label": "Obdobje varovanja (v letih)",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "unit": "let",
+        "is_float": false,
+        "min_value": 1,
+        "max_value": 20
+      }
+    },
+    {
+      "variable_name": "samodejno_podaljsanje",
+      "page_id": "page_trajanje",
+      "order": 2,
+      "type": "yes_no",
+      "label": "Ali se pogodba po izteku samodejno podaljša?",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "yes_label": "Da, samodejno se podaljša",
+        "no_label": "Ne, po izteku preneha"
+      }
+    },
+    {
+      "variable_name": "podaljsanje_let",
+      "page_id": "page_trajanje",
+      "order": 3,
+      "type": "number",
+      "label": "Za koliko let se pogodba samodejno podaljša?",
+      "required": true,
+      "show_if": {
+        "logic": "and",
+        "conditions": [
+          {
+            "variable": "samodejno_podaljsanje",
+            "operator": "equals",
+            "value": true
+          }
+        ]
+      },
+      "hide_if": null,
+      "settings": {
+        "unit": "let",
+        "is_float": false,
+        "min_value": 1,
+        "max_value": 10
+      }
+    },
+    {
+      "variable_name": "odpovedni_rok",
+      "page_id": "page_trajanje",
+      "order": 4,
+      "type": "number",
+      "label": "Odpovedni rok",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "unit": "dni",
+        "is_float": false,
+        "min_value": 7,
+        "max_value": 180
+      }
+    },
+    {
+      "variable_name": "obveznosti_po_prenehanju",
+      "page_id": "page_trajanje",
+      "order": 5,
+      "type": "number",
+      "label": "Koliko let po prenehanju pogodbe obveznosti varovanja še ostanejo v veljavi?",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "unit": "let",
+        "is_float": false,
+        "min_value": 1,
+        "max_value": 10
+      }
+    },
+
+    {
+      "variable_name": "zahteve_digitalne_varnosti",
+      "page_id": "page_trajanje",
+      "order": 6,
+      "type": "yes_no",
+      "label": "Ali zaupne informacije vključujejo digitalne podatke, kodo ali dostope do sistemov?",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "yes_label": "Da – vključi zahteve digitalne varnosti",
+        "no_label": "Ne"
+      }
+    },
+
+    {
+      "variable_name": "ukrepi_digitalne_varnosti",
+      "page_id": "page_digitalna_varnost",
+      "order": 1,
+      "type": "list",
+      "label": "Zahtevani ukrepi digitalne varnosti",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "min_items": 1,
+        "max_items": null,
+        "attributes": [
+          {
+            "attribute_name": "ukrep",
+            "label": "Ukrep (npr. Enkripcija podatkov, Dvostopenjska avtentikacija, VPN dostop)",
+            "type": "text",
+            "required": true,
+            "settings": {
+              "multiline": false,
+              "min_length": null,
+              "max_length": 300
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "variable_name": "dovoli_podizvajalce",
+      "page_id": "page_podizvajalci",
+      "order": 1,
+      "type": "yes_no",
+      "label": "Ali sme prejemající stranka zaupne informacije posredovati svojim podizvajalcem?",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "yes_label": "Da – bom navedel dovoljene podizvajalce",
+        "no_label": "Ne – razkritje tretjim osebam je prepovedano"
+      }
+    },
+
+    {
+      "variable_name": "seznam_podizvajalcev",
+      "page_id": "page_seznam_podizvajalcev",
+      "order": 1,
+      "type": "list",
+      "label": "Dovoljeni podizvajalci",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "min_items": 1,
+        "max_items": null,
+        "attributes": [
+          {
+            "attribute_name": "naziv",
+            "label": "Naziv podizvajalca",
+            "type": "text",
+            "required": true,
+            "settings": {
+              "multiline": false,
+              "min_length": null,
+              "max_length": 200
+            }
+          },
+          {
+            "attribute_name": "razlog",
+            "label": "Razlog dostopa (zakaj podizvajalec potrebuje zaupne informacije)",
+            "type": "text",
+            "required": true,
+            "settings": {
+              "multiline": true,
+              "min_length": null,
+              "max_length": 400
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "variable_name": "lestvica_kazni",
+      "page_id": "page_sankcije",
+      "order": 1,
+      "type": "list",
+      "label": "Lestvica pogodbenih kazni po stopnjah kršitve",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "min_items": 1,
+        "max_items": null,
+        "attributes": [
+          {
+            "attribute_name": "stopnja",
+            "label": "Stopnja kršitve (npr. Manjša kršitev, Huda kršitev, Namerna zloraba)",
+            "type": "text",
+            "required": true,
+            "settings": {
+              "multiline": false,
+              "min_length": null,
+              "max_length": 100
+            }
+          },
+          {
+            "attribute_name": "opis",
+            "label": "Opis kršitve",
+            "type": "text",
+            "required": true,
+            "settings": {
+              "multiline": true,
+              "min_length": null,
+              "max_length": 400
+            }
+          },
+          {
+            "attribute_name": "znesek",
+            "label": "Znesek kazni",
+            "type": "number",
+            "required": true,
+            "settings": {
+              "unit": "EUR",
+              "is_float": false,
+              "min_value": 1,
+              "max_value": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "variable_name": "vkljuci_visjo_silo",
+      "page_id": "page_sankcije",
+      "order": 2,
+      "type": "yes_no",
+      "label": "Ali naj pogodba vsebuje klavzulo o višji sili?",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "yes_label": "Da – vključi klavzulo višje sile",
+        "no_label": "Ne"
+      }
+    },
+    {
+      "variable_name": "vkljuci_omejeno_licenco",
+      "page_id": "page_sankcije",
+      "order": 3,
+      "type": "yes_no",
+      "label": "Ali naj prejemající stranki velja omejena licenca za uporabo zaupnih informacij med trajanjem pogodbe?",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "yes_label": "Da – vključi omejeno licenco",
+        "no_label": "Ne – brez licenčnih pravic"
+      }
+    },
+
+    {
+      "variable_name": "nacin_resevanja_sporov",
+      "page_id": "page_spori",
+      "order": 1,
+      "type": "select",
+      "label": "Način reševanja sporov",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "display_type": "radio",
+        "options": [
+          {
+            "label": "Sodišče – postopek pred pristojnim državnim sodiščem",
+            "value": "sodisce"
+          },
+          {
+            "label": "Arbitraža – hiter in zaupen zunajsodni postopek (priporočeno za mednarodne pogodbe)",
+            "value": "arbitraza"
+          },
+          {
+            "label": "Mediacija – neformalen postopek s posrednikom",
+            "value": "mediacija"
+          }
+        ]
+      }
+    },
+    {
+      "variable_name": "pristojno_sodisce",
+      "page_id": "page_spori",
+      "order": 2,
+      "type": "text",
+      "label": "Kraj pristojnega sodišča (npr. Ljubljana, Maribor)",
+      "required": true,
+      "show_if": {
+        "logic": "and",
+        "conditions": [
+          {
+            "variable": "nacin_resevanja_sporov",
+            "operator": "equals",
+            "value": "sodisce"
+          }
+        ]
+      },
+      "hide_if": null,
+      "settings": {
+        "multiline": false,
+        "min_length": null,
+        "max_length": 100
+      }
+    },
+    {
+      "variable_name": "arbitrazno_sodisce",
+      "page_id": "page_spori",
+      "order": 3,
+      "type": "text",
+      "label": "Arbitražna institucija (npr. ICC Pariz, Stalna arbitraža pri GZS)",
+      "required": true,
+      "show_if": {
+        "logic": "and",
+        "conditions": [
+          {
+            "variable": "nacin_resevanja_sporov",
+            "operator": "equals",
+            "value": "arbitraza"
+          }
+        ]
+      },
+      "hide_if": null,
+      "settings": {
+        "multiline": false,
+        "min_length": null,
+        "max_length": 200
+      }
+    },
+    {
+      "variable_name": "arbitrazni_jezik",
+      "page_id": "page_spori",
+      "order": 4,
+      "type": "select",
+      "label": "Jezik arbitražnega postopka",
+      "required": true,
+      "show_if": {
+        "logic": "and",
+        "conditions": [
+          {
+            "variable": "nacin_resevanja_sporov",
+            "operator": "equals",
+            "value": "arbitraza"
+          }
+        ]
+      },
+      "hide_if": null,
+      "settings": {
+        "display_type": "dropdown",
+        "options": [
+          { "label": "Slovenščina", "value": "slovenščina" },
+          { "label": "Angleščina", "value": "angleščina" },
+          { "label": "Nemščina", "value": "nemščina" },
+          { "label": "Hrvaščina", "value": "hrvaščina" }
+        ]
+      }
+    },
+    {
+      "variable_name": "mediatorska_institucija",
+      "page_id": "page_spori",
+      "order": 5,
+      "type": "text",
+      "label": "Mediatorska institucija (npr. ZPM Ljubljana, GZS)",
+      "required": true,
+      "show_if": {
+        "logic": "and",
+        "conditions": [
+          {
+            "variable": "nacin_resevanja_sporov",
+            "operator": "equals",
+            "value": "mediacija"
+          }
+        ]
+      },
+      "hide_if": null,
+      "settings": {
+        "multiline": false,
+        "min_length": null,
+        "max_length": 200
+      }
+    },
+    {
+      "variable_name": "drzava_prava",
+      "page_id": "page_spori",
+      "order": 6,
+      "type": "text",
+      "label": "Država merodajnega prava (npr. Republika Slovenija)",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "multiline": false,
+        "min_length": null,
+        "max_length": 100
+      }
+    },
+    {
+      "variable_name": "mednarodna_pogodba",
+      "page_id": "page_spori",
+      "order": 7,
+      "type": "yes_no",
+      "label": "Ali stranki delujeta v različnih državah (mednarodna pogodba)?",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "yes_label": "Da – dodaj klavzulo o GDPR in čezmejnem razkritju",
+        "no_label": "Ne, obe stranki sta v isti državi"
+      }
+    },
+
+    {
+      "variable_name": "dovoli_elektronski_podpis",
+      "page_id": "page_podpisi",
+      "order": 1,
+      "type": "yes_no",
+      "label": "Ali dovolite elektronski podpis (enakovreden lastnoročnemu po Uredbi eIDAS)?",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "yes_label": "Da – elektronski podpis je dovoljen",
+        "no_label": "Ne – zahtevam lastnoročni podpis"
+      }
+    },
+    {
+      "variable_name": "zahteva_pecata",
+      "page_id": "page_podpisi",
+      "order": 2,
+      "type": "yes_no",
+      "label": "Ali podpis zahteva tudi pečat podjetja?",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "yes_label": "Da – ob podpisu je zahtevan pečat",
+        "no_label": "Ne"
+      }
+    },
+    {
+      "variable_name": "vkljuci_prico",
+      "page_id": "page_podpisi",
+      "order": 3,
+      "type": "yes_no",
+      "label": "Ali naj pogodba vključuje podpisni blok za pričo oziroma neodvisnega svetovalca?",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "yes_label": "Da – vključi podpisni blok za pričo",
+        "no_label": "Ne"
+      }
+    },
+    {
+      "variable_name": "datum_prica",
+      "page_id": "page_podpisi",
+      "order": 4,
+      "type": "date",
+      "label": "Datum podpisa priče",
+      "required": true,
+      "show_if": {
+        "logic": "and",
+        "conditions": [
+          { "variable": "vkljuci_prico", "operator": "equals", "value": true }
+        ]
+      },
+      "hide_if": null,
+      "settings": {
+        "date_format": "d. MMMM yyyy",
+        "locale": "sl"
+      }
+    },
+    {
+      "variable_name": "ima_posebne_dolocbe",
+      "page_id": "page_podpisi",
+      "order": 5,
+      "type": "yes_no",
+      "label": "Ali želite v pogodbo dodati posebne določbe (npr. omejitev konkurence, posebni pogoji dostopa)?",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "yes_label": "Da – bom vnesel posebne določbe",
+        "no_label": "Ne, posebnih določb ni"
+      }
+    },
+    {
+      "variable_name": "posebne_dolocbe",
+      "page_id": "page_podpisi",
+      "order": 6,
+      "type": "text",
+      "label": "Besedilo posebnih določb",
+      "required": true,
+      "show_if": {
+        "logic": "and",
+        "conditions": [
+          {
+            "variable": "ima_posebne_dolocbe",
+            "operator": "equals",
+            "value": true
+          }
+        ]
+      },
+      "hide_if": null,
+      "settings": {
+        "multiline": true,
+        "min_length": null,
+        "max_length": 2000
+      }
+    },
+
+    {
+      "variable_name": "ima_priloge",
+      "page_id": "page_priloge",
+      "order": 1,
+      "type": "yes_no",
+      "label": "Ali boste k pogodbi priložili eno ali več prilog?",
+      "required": true,
+      "show_if": null,
+      "hide_if": null,
+      "settings": {
+        "yes_label": "Da – bom navedel priloge",
+        "no_label": "Ne, prilog ni"
+      }
+    },
+    {
+      "variable_name": "priloge",
+      "page_id": "page_priloge",
+      "order": 2,
+      "type": "list",
+      "label": "Seznam prilog",
+      "required": true,
+      "show_if": {
+        "logic": "and",
+        "conditions": [
+          { "variable": "ima_priloge", "operator": "equals", "value": true }
+        ]
+      },
+      "hide_if": null,
+      "settings": {
+        "min_items": 1,
+        "max_items": null,
+        "attributes": [
+          {
+            "attribute_name": "naziv",
+            "label": "Naziv priloge (npr. Specifikacija zaupnih podatkov)",
+            "type": "text",
+            "required": true,
+            "settings": {
+              "multiline": false,
+              "min_length": null,
+              "max_length": 200
+            }
+          },
+          {
+            "attribute_name": "opis",
+            "label": "Kratek opis vsebine priloge",
+            "type": "text",
+            "required": false,
+            "settings": {
+              "multiline": true,
+              "min_length": null,
+              "max_length": 500
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
