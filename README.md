@@ -79,8 +79,13 @@ npm install
 
 **Terminal 1 - Backend:**
 ```bash
+#run template creator
 cd /LLA/src/LLM
 python websocketService.py
+
+#run edditor
+cd /LLA/src/LLM
+python websocketServiceEdditor.py
 ```
 
 Expected output:
@@ -91,6 +96,11 @@ Websocket server is running on ws://localhost:8000
 
 **Terminal 2 - Frontend:**
 ```bash
+#run template creator
+cd /LLA/src/new_frontend
+npm run dev
+
+#run edditor
 cd /LLA/src/frontend
 npm run dev
 ```
