@@ -6,6 +6,7 @@ import FileBrowser, { type DocFile } from "@/components/FileBrowser";
 import ChatPanel from "@/components/ChatPanel";
 import DocumentEditor from "@/components/DocumentEditor";
 import { useWebSocket } from "@/hooks/useWebSocket";
+import { applyEditCommand } from "@/lib/documentEditor";
 
 const Home = () => {
   const { status, sendMessage, sendGenerateTutorial, onMessage } = useWebSocket();
@@ -72,6 +73,13 @@ const Home = () => {
     }
   }, []);
 
+  const handleDocumentEdit = useCallback((command: string) => {
+    setDocContent((currentContent) => {
+      const newContent = applyEditCommand(currentContent, command);
+      return newContent;
+    });
+  }, []);
+
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <Header connectionStatus={status} />
@@ -92,6 +100,7 @@ const Home = () => {
             sendGenerateTutorial={sendGenerateTutorial} 
             onMessage={onMessage}
             documentContent={docContent}
+            onDocumentEdit={handleDocumentEdit}
           />
         </div>
         {/* Document Editor - 50% */}
