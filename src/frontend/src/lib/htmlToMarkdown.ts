@@ -1,8 +1,11 @@
 /**
  * Converts HTML content to Markdown format
  * Handles common HTML elements: headings, paragraphs, bold, italic, lists, etc.
+ * 
+ * @param html - HTML content to convert
+ * @param addLineNumbers - If true, adds line numbers in format (N | text)
  */
-export function htmlToMarkdown(html: string): string {
+export function htmlToMarkdown(html: string, addLineNumbers: boolean = false): string {
   // Create a temporary DOM element to parse HTML
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = html;
@@ -78,17 +81,41 @@ export function htmlToMarkdown(html: string): string {
         return `${children}\n`;
       case 'span':
         return children;
+      case 'table':
+        // Preserve table HTML as-is with a special marker
+        const tableHtml = element.outerHTML;
+        return `__HTML_TABLE_START__\n${tableHtml}\n__HTML_TABLE_END__\n\n`;
+      case 'thead':
+      case 'tbody':
+      case 'tfoot':
+      case 'tr':
+      case 'td':
+      case 'th':
+        // These are handled by the table parent, but if encountered standalone, preserve
+        return children;
       default:
         return children;
     }
   }
   
-  const markdown = Array.from(tempDiv.childNodes)
+  let markdown = Array.from(tempDiv.childNodes)
     .map(processNode)
     .join('');
   
   // Clean up extra newlines
-  return markdown
+  markdown = markdown
     .replace(/\n{3,}/g, '\n\n')
     .trim();
+  
+  // Add line numbers if requested
+  if (addLineNumbers) {
+    const lines = markdown.split('\n');
+    const numberedLines = lines.map((line, index) => {
+      const lineNum = index + 1;
+      return `(${lineNum} | ${line})`;
+    });
+    return numberedLines.join('\n');
+  }
+  
+  return markdown;
 }

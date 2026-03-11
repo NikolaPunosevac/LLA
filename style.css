@@ -1,0 +1,173 @@
+/* --- Font & Base --- */
+body, #interview {
+  font-family: 'Inter', sans-serif;
+  color: #0d0d0d;
+  background: linear-gradient(135deg, #00bcd4, #006064); /* cyan gradient ozadje */
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+/* --- Sidebar --- */
+#interview #sidebar {
+  width: 250px;
+  background-color: rgba(255, 255, 255, 0.95); /* bel “otoček” z rahlo prosojnostjo */
+  color: #006064;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  bottom: 20px;
+  overflow-y: auto;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  padding: 20px;
+}
+
+#interview #sidebar .sidebar-content .title {
+  font-size: 1.8em;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #006064;
+}
+
+#interview #sidebar .sidebar-content .sidebar-items .sidebar-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 5px;
+  border-radius: 10px;
+  margin-bottom: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+#interview #sidebar .sidebar-content .sidebar-items .sidebar-item:hover {
+  background-color: rgba(0, 188, 212, 0.2);
+}
+
+#interview #sidebar .sidebar-content .sidebar-items .sidebar-item .icon {
+  margin-right: 10px;
+  color: #00bcd4;
+}
+
+/* --- Main Content --- */
+#interview #content {
+  margin-left: 290px;
+  padding: 40px;
+}
+
+#interview #content .section {
+  margin-bottom: 40px;
+  background-color: rgba(255,255,255,0.95); /* bel “otoček” za sekcije */
+  padding: 20px 30px;
+  border-radius: 15px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+}
+
+#interview #content .section .title {
+  font-size: 1.5em;
+  font-weight: 700;
+  color: #006064;
+  margin-bottom: 10px;
+}
+
+#interview #content .section .description {
+  font-size: 1em;
+  color: #004d40;
+  margin-bottom: 15px;
+}
+
+#interview #content .section .fields .field-wrapper {
+  margin-bottom: 20px;
+}
+
+#interview #content .section .fields .field-wrapper .title {
+  font-weight: 600;
+  color: #006064;
+  margin-bottom: 5px;
+}
+
+/* --- Buttons --- */
+#interview #content .section .actions .back,
+#interview #content .section .actions .continue {
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+#interview #content .section .actions .back {
+  background-color: #004d40;
+  color: #ffffff;
+  margin-right: 10px;
+}
+
+#interview #content .section .actions .back:hover {
+  background-color: #006064;
+}
+
+#interview #content .section .actions .continue {
+  background-color: #00bcd4;
+  color: #ffffff;
+}
+
+#interview #content .section .actions .continue:hover {
+  background-color: #0097a7;
+}
+
+/* --- Loading, Error, Success --- */
+#loading, #error, #success, #in-progress {
+  text-align: center;
+  padding: 50px;
+  font-size: 1.2em;
+  background-color: rgba(255,255,255,0.95);
+  margin: 40px auto;
+  width: calc(100% - 60px);
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+#loading .loading-indicator,
+#in-progress .loading-indicator {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #00bcd4;
+  border-top-color: #006064;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* --- Input Fields --- */
+#interview #content .section .fields .field-wrapper input,
+#interview #content .section .fields .field-wrapper textarea,
+#interview #content .section .fields .field-wrapper select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #0097a7; /* svetlo cyan ivica */
+  border-radius: 8px;
+  font-size: 1em;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  background-color: rgba(255,255,255,0.9);
+  color: #004d40;
+}
+
+/* --- Focus effect --- */
+#interview #content .section .fields .field-wrapper input:focus,
+#interview #content .section .fields .field-wrapper textarea:focus,
+#interview #content .section .fields .field-wrapper select:focus {
+  border-color: #00bcd4; /* cyan naglasak */
+  box-shadow: 0 0 8px rgba(0, 188, 212, 0.3);
+}
+
+/* --- Placeholder color --- */
+#interview #content .section .fields .field-wrapper ::placeholder {
+  color: #80deea;
+  opacity: 1;
+}

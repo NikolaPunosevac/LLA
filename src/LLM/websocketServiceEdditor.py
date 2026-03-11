@@ -3,11 +3,10 @@ import json
 import logging
 import re
 import sys
-import time
 from pathlib import Path
 from websockets.server import serve
 from websockets.exceptions import ConnectionClosed
-from LLMclass import LLM
+from LLMclassEdditor import LLM
 
 # Allow importing generate_tutorial from sibling directory
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -64,8 +63,8 @@ async def handle_client(websocket, path):
         await websocket.close(code=1008, reason="Invalid path")
         return
 
-    llm = LLM()
-    # Store document markdown per connection (not yet used in LLM calls)
+    # LLM will be initialized per message based on whether document is provided
+    # Store document markdown per connection
     document_markdown = None
     
     try:
@@ -83,10 +82,26 @@ async def handle_client(websocket, path):
                 # Handle chat messages
                 if data["type"] == "chat":
                     user_message = data["message"]
-                    # Extract document markdown if provided (not yet used in LLM calls)
+                    # Extract document markdown if provided
                     document_markdown = data.get("documentMarkdown")
+                    
+                    # Initialize LLM with document editing prompt if document is provided
                     if document_markdown:
-                        logger.info(f"Received document markdown ({len(document_markdown)} chars), stored but not yet used in LLM calls")
+                        logger.info(f"Received document markdown ({len(document_markdown)} chars), using document editing mode")
+                        llm = LLM(use_document_editing_prompt=True)
+                        # Add document context to the user message
+                        user_message_with_doc = f"""Tukaj je vsebina dokumenta v markdown formatu:
+
+{document_markdown}
+
+---
+
+Odvetnik zahteva:
+{user_message}"""
+                    else:
+                        llm = LLM()
+                        user_message_with_doc = user_message
+                    
                     logger.info(f"Processing chat message: {user_message}")
                     
                     # Send response start signal
@@ -97,10 +112,17 @@ async def handle_client(websocket, path):
                     await websocket.send(json.dumps(start_response))
                     logger.info("Sent response_start signal")
                     
+                    # Collect all streamed chunks into a string
+                    full_response = ""
+                    
                     # Get LLM response with streaming
-                    llm_response = llm.respond(user_message, stream=True)
+                    llm_response = llm.respond(user_message_with_doc, stream=True)
                     for chunk in llm_response:
                         print(chunk)
+                        # Accumulate chunks for parsing
+                        full_response += chunk
+                        
+                        # Send chunk to frontend for display
                         chunk_response = {
                             "type": "response_chunk",
                             "message": chunk
@@ -111,16 +133,34 @@ async def handle_client(websocket, path):
                         await asyncio.sleep(0.001)  # 1ms delay - imperceptible but allows processing
                         logger.debug(f"Sent response chunk: {chunk}")
                     
-                    # TEST: Send edit command [1-5]['hello world'] on every message
-                    # This will be parsed by the frontend and applied to the document
-                    test_edit_command = "[1-5]['hello world']"
-                    logger.info(f"Sending test edit command: {test_edit_command}")
-                    edit_chunk_response = {
-                        "type": "response_chunk",
-                        "message": test_edit_command
-                    }
-                    await websocket.send(json.dumps(edit_chunk_response))
-                    await asyncio.sleep(0.001)
+                    # Parse for edit commands in format %$[start-end]['text']%$ or %$[start-end]["text"]%$
+                    # Pattern matches: %$[number-number]['text']%$ or %$[number-number]["text"]%$
+                    # Handle both single and double quotes, with multiline support
+                    # Use non-greedy match to capture everything until ']%$ or "]%$
+                    edit_pattern_single = r'%\$\[(\d+)-(\d+)\]\[\'(.*?)\'\]%\$'
+                    edit_pattern_double = r'%\$\[(\d+)-(\d+)\]\[\"(.*?)\"\]%\$'
+                    
+                    edit_matches = []
+                    # Find matches with single quotes (with DOTALL to handle newlines)
+                    for match in re.finditer(edit_pattern_single, full_response, re.DOTALL):
+                        edit_matches.append((match.group(1), match.group(2), match.group(3)))
+                    # Find matches with double quotes (with DOTALL to handle newlines)
+                    for match in re.finditer(edit_pattern_double, full_response, re.DOTALL):
+                        edit_matches.append((match.group(1), match.group(2), match.group(3)))
+                    
+                    if edit_matches:
+                        logger.info(f"Found {len(edit_matches)} edit command(s) in response")
+                        # Send each edit command as a separate message
+                        for start_line, end_line, replacement_text in edit_matches:
+                            logger.info(f"Sending edit command: lines {start_line}-{end_line}, text length: {len(replacement_text)}")
+                            edit_chunk_response = {
+                                "type": "edit_word",
+                                "message": replacement_text,
+                                "start_line": int(start_line),
+                                "end_line": int(end_line)
+                            }
+                            await websocket.send(json.dumps(edit_chunk_response))
+                            await asyncio.sleep(0.001)
                     
                     # Send response end signal
                     end_response = {
@@ -133,7 +173,7 @@ async def handle_client(websocket, path):
                 elif data["type"] == "process_docx":
                     # Full pipeline: DOCX text -> LLM -> JSON -> tutorial steps
                     docx_text = data["message"]
-                    logger.info(f"Processing process_docx request ({len(docx_text)} chars)")
+                    logger.info("Processing process_docx request")
 
                     await websocket.send(json.dumps({
                         "type": "status",
@@ -143,31 +183,18 @@ async def handle_client(websocket, path):
                     # 1. Use LLM to generate interview JSON from DOCX content
                     docx_llm = LLM()
                     docx_llm.messages = [{"role": "system", "content": SYSTEM_PROMPT}]
-                    logger.info(f"System prompt: {len(SYSTEM_PROMPT)} chars, user prompt: {len(docx_text)} chars")
-                    logger.info("Sending request to LLM ...")
-                    t0 = time.time()
                     try:
                         llm_raw = docx_llm.respond(
                             f"Tukaj je vsebina Word predloge:\n\n{docx_text}",
                             stream=False
                         )
                     except Exception as e:
-                        elapsed = time.time() - t0
                         await websocket.send(json.dumps({
                             "type": "process_error",
                             "message": f"Napaka pri klicu LLM: {e}"
                         }))
-                        logger.error(f"LLM call failed after {elapsed:.1f}s: {e}")
+                        logger.error(f"LLM call failed: {e}")
                         continue
-
-                    elapsed = time.time() - t0
-                    logger.info(f"LLM responded in {elapsed:.1f}s ({len(llm_raw)} chars)")
-                    logger.info(f"LLM response (first 500 chars):\n{llm_raw[:500]}")
-
-                    await websocket.send(json.dumps({
-                        "type": "status",
-                        "message": f"LLM odgovoril v {elapsed:.1f}s. Parsiram JSON ..."
-                    }))
 
                     # 2. Parse JSON from LLM response
                     try:
@@ -179,16 +206,11 @@ async def handle_client(websocket, path):
                             "message": f"LLM ni vrnil veljavnega JSON: {e}\n\nOdgovor LLM:\n{llm_raw[:2000]}"
                         }))
                         logger.error(f"JSON parse failed: {e}")
-                        logger.error(f"Full LLM response:\n{llm_raw}")
                         continue
-
-                    n_pages = len(interview_data.get("pages", []))
-                    n_vars = len(interview_data.get("variables", []))
-                    logger.info(f"Parsed JSON OK: {n_pages} pages, {n_vars} variables")
 
                     await websocket.send(json.dumps({
                         "type": "status",
-                        "message": f"JSON OK ({n_pages} strani, {n_vars} spremenljivk). Generiram tutorial ..."
+                        "message": "Generiram tutorial ..."
                     }))
 
                     # 3. Generate tutorial steps
@@ -202,7 +224,7 @@ async def handle_client(websocket, path):
                         logger.error(f"Tutorial generation failed: {e}")
                         continue
 
-                    # 4. Split steps into slides (by ## and ### sections)
+                    # 4. Split steps into slides (by ## sections)
                     slides = []
                     current_slide = []
                     for line in steps:

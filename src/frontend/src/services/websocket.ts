@@ -4,6 +4,8 @@ export interface WSMessage {
   type: string;
   message: string;
   documentMarkdown?: string;
+  start_line?: number;
+  end_line?: number;
 }
 
 type MessageHandler = (msg: WSMessage) => void;

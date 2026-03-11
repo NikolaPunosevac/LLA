@@ -73,7 +73,7 @@ const Home = () => {
     }
   }, []);
 
-  const handleDocumentEdit = useCallback((command: string) => {
+  const handleDocumentEdit = useCallback((command: string | { start: number; end: number; text: string }) => {
     setDocContent((currentContent) => {
       const newContent = applyEditCommand(currentContent, command);
       return newContent;
