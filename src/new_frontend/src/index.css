@@ -2,62 +2,86 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
+html, body, #root {
+  height: 100%;
   margin: 0;
+}
+
+body {
   font-family:
+    "Inter",
     -apple-system,
     BlinkMacSystemFont,
     "Segoe UI",
     Roboto,
     sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Markdown prose styling for slideshow */
 .prose h1 {
-  @apply text-2xl font-bold mb-4 text-gray-900;
+  @apply text-4xl font-bold mb-6 text-gray-900;
+}
+.prose h1:first-child {
+  @apply mt-0;
 }
 
 .prose h2 {
-  @apply text-xl font-semibold mb-3 mt-6 text-gray-800;
+  @apply text-3xl font-semibold mb-5 mt-10 text-gray-800 pb-2.5 border-b border-gray-100;
 }
 
 .prose h3 {
-  @apply text-lg font-semibold mb-2 mt-4 text-gray-700;
+  @apply text-2xl font-semibold mb-4 mt-8 text-gray-700;
 }
 
 .prose h4 {
-  @apply text-base font-semibold mb-2 mt-3 text-gray-700;
+  @apply text-xl font-semibold mb-3 mt-6 text-gray-700;
 }
 
 .prose p {
-  @apply mb-3 text-gray-600 leading-relaxed;
+  @apply mb-5 text-lg text-gray-600 leading-relaxed;
 }
 
 .prose ol {
-  @apply list-decimal list-inside mb-3 space-y-1.5;
+  @apply list-decimal pl-7 mb-5 space-y-2;
 }
 
 .prose ul {
-  @apply list-disc list-inside mb-3 space-y-1;
+  @apply list-disc pl-7 mb-5 space-y-1.5;
 }
 
 .prose li {
-  @apply text-gray-600;
+  @apply text-lg text-gray-600 leading-relaxed;
 }
 
 .prose code {
-  @apply bg-gray-100 text-blue-700 px-1.5 py-0.5 rounded text-sm font-mono;
+  @apply bg-cyan-50 text-cyan-700 px-2 py-1 rounded text-base font-mono font-medium;
 }
 
 .prose pre {
-  @apply bg-gray-100 rounded-lg p-4 overflow-x-auto mb-3;
+  @apply bg-gray-50 border border-gray-100 rounded-lg p-5 overflow-x-auto mb-5;
 }
 
 .prose pre code {
-  @apply bg-transparent p-0;
+  @apply bg-transparent p-0 text-gray-700 text-base;
 }
 
 .prose strong {
   @apply font-semibold text-gray-800;
+}
+
+/* Custom scrollbar for slide content */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
 }

@@ -3,6 +3,7 @@ import json
 import logging
 import re
 import sys
+import time
 from pathlib import Path
 from websockets.server import serve
 from websockets.exceptions import ConnectionClosed
@@ -173,7 +174,7 @@ Odvetnik zahteva:
                 elif data["type"] == "process_docx":
                     # Full pipeline: DOCX text -> LLM -> JSON -> tutorial steps
                     docx_text = data["message"]
-                    logger.info("Processing process_docx request")
+                    logger.info(f"Processing process_docx request ({len(docx_text)} chars)")
 
                     await websocket.send(json.dumps({
                         "type": "status",
@@ -183,18 +184,31 @@ Odvetnik zahteva:
                     # 1. Use LLM to generate interview JSON from DOCX content
                     docx_llm = LLM()
                     docx_llm.messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+                    logger.info(f"System prompt: {len(SYSTEM_PROMPT)} chars, user prompt: {len(docx_text)} chars")
+                    logger.info("Sending request to LLM ...")
+                    t0 = time.time()
                     try:
                         llm_raw = docx_llm.respond(
                             f"Tukaj je vsebina Word predloge:\n\n{docx_text}",
                             stream=False
                         )
                     except Exception as e:
+                        elapsed = time.time() - t0
                         await websocket.send(json.dumps({
                             "type": "process_error",
                             "message": f"Napaka pri klicu LLM: {e}"
                         }))
-                        logger.error(f"LLM call failed: {e}")
+                        logger.error(f"LLM call failed after {elapsed:.1f}s: {e}")
                         continue
+
+                    elapsed = time.time() - t0
+                    logger.info(f"LLM responded in {elapsed:.1f}s ({len(llm_raw)} chars)")
+                    logger.info(f"LLM response (first 500 chars):\n{llm_raw[:500]}")
+
+                    await websocket.send(json.dumps({
+                        "type": "status",
+                        "message": f"LLM odgovoril v {elapsed:.1f}s. Parsiram JSON ..."
+                    }))
 
                     # 2. Parse JSON from LLM response
                     try:
@@ -206,11 +220,16 @@ Odvetnik zahteva:
                             "message": f"LLM ni vrnil veljavnega JSON: {e}\n\nOdgovor LLM:\n{llm_raw[:2000]}"
                         }))
                         logger.error(f"JSON parse failed: {e}")
+                        logger.error(f"Full LLM response:\n{llm_raw}")
                         continue
+
+                    n_pages = len(interview_data.get("pages", []))
+                    n_vars = len(interview_data.get("variables", []))
+                    logger.info(f"Parsed JSON OK: {n_pages} pages, {n_vars} variables")
 
                     await websocket.send(json.dumps({
                         "type": "status",
-                        "message": "Generiram tutorial ..."
+                        "message": f"JSON OK ({n_pages} strani, {n_vars} spremenljivk). Generiram tutorial ..."
                     }))
 
                     # 3. Generate tutorial steps
@@ -224,7 +243,7 @@ Odvetnik zahteva:
                         logger.error(f"Tutorial generation failed: {e}")
                         continue
 
-                    # 4. Split steps into slides (by ## sections)
+                    # 4. Split steps into slides (by ## and ### sections)
                     slides = []
                     current_slide = []
                     for line in steps:

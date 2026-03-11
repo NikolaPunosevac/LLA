@@ -230,13 +230,11 @@ def generate_tutorial(data: dict) -> list[str]:
     # ------------------------------------------------------------------
     # 1. Create pages
     # ------------------------------------------------------------------
-    steps.append("## Strani intervjuja")
-    steps.append("")
 
     for i, page in enumerate(pages):
         if i == 0:
             steps.append(
-                f"### Stran {i + 1}: {page['title']}"
+                f"## Stran {i + 1}: {page['title']}"
             )
             steps.append("")
             steps.append(
@@ -245,7 +243,7 @@ def generate_tutorial(data: dict) -> list[str]:
             )
         else:
             steps.append(
-                f"### Stran {i + 1}: {page['title']}"
+                f"## Stran {i + 1}: {page['title']}"
             )
             steps.append("")
             steps.append(
@@ -275,17 +273,17 @@ def generate_tutorial(data: dict) -> list[str]:
     # ------------------------------------------------------------------
     # 2. Variables, grouped by page
     # ------------------------------------------------------------------
-    steps.append("## Spremenljivke")
-    steps.append("")
 
     global_var_num = 0
+    first_id = pages[0]["page_id"] if pages else ''
+    first = pages[0]['title'] if pages else ''
     for page in pages:
         pid = page["page_id"]
         page_vars = vars_by_page.get(pid, [])
         if not page_vars:
             continue
 
-        steps.append(f"### Stran: {page['title']}")
+        steps.append(f"## Stran: {page['title']}")
         steps.append("")
 
         for var in page_vars:
@@ -296,22 +294,28 @@ def generate_tutorial(data: dict) -> list[str]:
             vreq = var.get("required", False)
             settings = var.get("settings", {})
 
-            steps.append(f"#### {global_var_num}. `{vname}`")
+            steps.append(f"### {global_var_num}. `{vname}`")
             steps.append("")
 
             substeps: list[str] = []
+            if pid == first_id:
+                substeps.append(
+                    f"1. Poišči spremenljivko `{vname}`."
+                )
+            else:
+                substeps.append(
+                    f"1. Na strani `{first}` Poišči spremenljivko `{vname}` in jo **premakni** na "
+                    f"stran `{page['title']}`."
+                )
+                
             substeps.append(
-                f"1. Poišči spremenljivko `{vname}` in jo **premakni** na "
-                f"stran `{page['title']}`."
-            )
-            substeps.append(
-                f"2. Nastavi tip na **{TYPE_LABELS.get(vtype, vtype)}**."
-            )
-            substeps.append(
-                f"3. Nastavi oznako (label) na:\n"
+                f"2. Nastavi oznako (label) na:\n"
                 f"   ```\n"
                 f"   {vlabel}\n"
                 f"   ```"
+            )
+            substeps.append(
+                f"3. Nastavi tip na **{TYPE_LABELS.get(vtype, vtype)}**."
             )
             if vreq:
                 substeps.append(f"4. Vklopi **Required**.")
