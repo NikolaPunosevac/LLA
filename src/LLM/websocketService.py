@@ -3,6 +3,7 @@ import json
 import logging
 from websockets.server import serve
 from websockets.exceptions import ConnectionClosed
+from LLMclass import LLM
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -46,6 +47,8 @@ async def handle_client(websocket, path):
         logger.warning(f"Rejecting connection to invalid path: {path}")
         await websocket.close(code=1008, reason="Invalid path")
         return
+
+    llm = LLM()
     
     try:
         async for message in websocket:
@@ -64,17 +67,36 @@ async def handle_client(websocket, path):
                     user_message = data["message"]
                     logger.info(f"Processing chat message: {user_message}")
                     
-                    # Get LLM response
-                    #llm_response = await get_llm_response(user_message)
-                    llm_response = "This is a test response"                    
-                    
-                    # Send response back to client
-                    response = {
-                        "type": "response",
-                        "message": llm_response
+                    # Send response start signal
+                    start_response = {
+                        "type": "response_start",
+                        "message": ""
                     }
-                    await websocket.send(json.dumps(response))
-                    logger.info(f"Sent response: {response}")
+                    await websocket.send(json.dumps(start_response))
+                    logger.info("Sent response_start signal")
+                    
+                    # Get LLM response with streaming
+                    llm_response = llm.respond(user_message, stream=True)
+                    for chunk in llm_response:
+                        print(chunk)
+                        chunk_response = {
+                            "type": "response_chunk",
+                            "message": chunk
+                        }
+                        await websocket.send(json.dumps(chunk_response))
+                        # Small delay to allow frontend to process each chunk in real-time
+                        # This prevents all chunks from arriving at once
+                        await asyncio.sleep(0.001)  # 1ms delay - imperceptible but allows processing
+                        logger.debug(f"Sent response chunk: {chunk}")
+                    
+                    # Send response end signal
+                    end_response = {
+                        "type": "response_end",
+                        "message": ""
+                    }
+                    await websocket.send(json.dumps(end_response))
+                    logger.info("Sent response_end signal")
+                    
                 else:
                     logger.warning(f"Unknown message type: {data['type']}")
                     

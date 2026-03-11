@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { flushSync } from "react-dom";
 import { Trash2 } from "lucide-react";
 import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
@@ -19,6 +20,8 @@ const ChatPanel = ({ sendMessage, onMessage }: ChatPanelProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const streamingMessageIdRef = useRef<string | null>(null);
+  const streamingContentRef = useRef<string>("");
 
   const scrollToBottom = () => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -30,7 +33,49 @@ const ChatPanel = ({ sendMessage, onMessage }: ChatPanelProps) => {
 
   useEffect(() => {
     const unsub = onMessage((msg) => {
-      if (msg.type === "response") {
+      console.log("Received message:", msg.type, msg.message?.substring(0, 50));
+      
+      if (msg.type === "response_start") {
+        // Create a new AI message when streaming starts
+        setIsTyping(false);
+        const newMessageId = crypto.randomUUID();
+        streamingMessageIdRef.current = newMessageId;
+        streamingContentRef.current = "";
+        console.log("Starting new stream, message ID:", newMessageId);
+        setMessages((prev) => [
+          ...prev,
+          { id: newMessageId, role: "ai", content: "" },
+        ]);
+      } else if (msg.type === "response_chunk") {
+        // Append chunk to the current streaming message
+        if (streamingMessageIdRef.current && msg.message) {
+          streamingContentRef.current += msg.message;
+          console.log("Chunk received, total length:", streamingContentRef.current.length, "chunk:", msg.message.substring(0, 30));
+          // Use flushSync to force immediate update and prevent batching
+          flushSync(() => {
+            setMessages((prev) => {
+              const updated = prev.map((m) =>
+                m.id === streamingMessageIdRef.current
+                  ? { ...m, content: streamingContentRef.current }
+                  : m
+              );
+              console.log("Updated message content length:", updated.find(m => m.id === streamingMessageIdRef.current)?.content.length);
+              return updated;
+            });
+          });
+        } else {
+          console.warn("Received chunk but no streaming message ID or empty message", {
+            hasId: !!streamingMessageIdRef.current,
+            hasMessage: !!msg.message
+          });
+        }
+      } else if (msg.type === "response_end") {
+        // Finalize the streaming message
+        console.log("Stream ended, final content length:", streamingContentRef.current.length);
+        streamingMessageIdRef.current = null;
+        streamingContentRef.current = "";
+      } else if (msg.type === "response") {
+        // Fallback for non-streaming responses (backward compatibility)
         setIsTyping(false);
         setMessages((prev) => [
           ...prev,
@@ -56,6 +101,8 @@ const ChatPanel = ({ sendMessage, onMessage }: ChatPanelProps) => {
   const clearChat = () => {
     setMessages([]);
     setIsTyping(false);
+    streamingMessageIdRef.current = null;
+    streamingContentRef.current = "";
   };
 
   return (
