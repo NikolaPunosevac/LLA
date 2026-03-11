@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@layer base {
+  :root {
+    --background: 220 60% 98%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 220 100% 56%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 224 100% 94%;
+    --secondary-foreground: 220 100% 56%;
+
+    --muted: 220 40% 96%;
+    --muted-foreground: 220 15% 50%;
+
+    --accent: 220 100% 97%;
+    --accent-foreground: 220 100% 56%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 224 80% 92%;
+    --input: 224 80% 92%;
+    --ring: 220 100% 56%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 220 100% 56%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 100% 97%;
+    --sidebar-accent-foreground: 220 100% 56%;
+    --sidebar-border: 224 80% 92%;
+    --sidebar-ring: 220 100% 56%;
+
+    /* Custom tokens */
+    --primary-hover: 220 100% 62%;
+    --chat-user-bg: 220 100% 56%;
+    --chat-ai-bg: 0 0% 100%;
+    --chat-ai-border: 224 80% 92%;
+    --panel-bg: 0 0% 100%;
+    --panel-header-bg: 220 60% 98%;
+    --header-bg: 0 0% 100%;
+    --status-connected: 142 76% 36%;
+    --status-connecting: 38 92% 50%;
+    --status-disconnected: 0 84% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 3px;
+  }
+}
