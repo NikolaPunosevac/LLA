@@ -22,6 +22,7 @@ class LLM:
             base_url=base_url
         )
         self.model = model
+        self.messages = []
     
     def respond(self, text, stream=False, conversation_history=None):
         """
@@ -37,14 +38,14 @@ class LLM:
             generator: A generator yielding response chunks if stream=True
         """
         # Build messages list
-        messages = []
-        
+        '''
         # Add conversation history if provided
         if conversation_history:
             messages.extend(conversation_history)
+        '''
         
         # Add the current user message
-        messages.append({
+        self.messages.append({
             "role": "user",
             "content": text
         })
@@ -52,7 +53,7 @@ class LLM:
         # Create the completion request
         response = self.client.chat.completions.create(
             model=self.model,
-            messages=messages,
+            messages=self.messages,
             stream=stream
         )
         
