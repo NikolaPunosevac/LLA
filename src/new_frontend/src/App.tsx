@@ -8,29 +8,34 @@ export default function App() {
     useDocuWise();
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="h-screen flex flex-col overflow-hidden bg-gray-50">
       {/* Connection indicator */}
-      <div className="flex items-center justify-end px-4 py-2 text-xs gap-2">
-        <span
-          className={`w-2 h-2 rounded-full ${
-            status === "connected"
-              ? "bg-green-500"
-              : status === "connecting"
-              ? "bg-yellow-400 animate-pulse"
-              : "bg-red-500"
-          }`}
-        />
-        <span className="text-gray-400">
-          {status === "connected"
-            ? "Povezan"
-            : status === "connecting"
-            ? "Povezujem ..."
-            : "Ni povezave"}
+      <header className="flex-none flex items-center justify-between px-5 py-2.5 bg-cyan-600">
+        <span className="text-sm font-semibold tracking-tight text-white">
+          DocuWise Tutorial
         </span>
-      </div>
+        <div className="flex items-center gap-2 text-xs">
+          <span
+            className={`w-1.5 h-1.5 rounded-full ring-1 ring-white/30 ${
+              status === "connected"
+                ? "bg-emerald-300"
+                : status === "connecting"
+                ? "bg-amber-300 animate-pulse"
+                : "bg-red-400"
+            }`}
+          />
+          <span className="text-cyan-100">
+            {status === "connected"
+              ? "Povezan"
+              : status === "connecting"
+              ? "Povezujem ..."
+              : "Ni povezave"}
+          </span>
+        </div>
+      </header>
 
-      {/* Main content */}
-      <div className="flex-1">
+      {/* Main content — takes remaining height */}
+      <main className="flex-1 min-h-0">
         {phase === "upload" && (
           <UploadStep
             onDocxText={processDocx}
@@ -42,7 +47,7 @@ export default function App() {
         {phase === "slideshow" && (
           <Slideshow slides={slides} onReset={reset} />
         )}
-      </div>
+      </main>
     </div>
   );
 }

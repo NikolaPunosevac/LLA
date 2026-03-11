@@ -202,7 +202,7 @@ async def handle_client(websocket, path):
                         logger.error(f"Tutorial generation failed: {e}")
                         continue
 
-                    # 4. Split steps into slides (by ## sections)
+                    # 4. Split steps into slides (by ## and ### sections)
                     slides = []
                     current_slide = []
                     for line in steps:

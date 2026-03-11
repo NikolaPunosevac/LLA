@@ -46,15 +46,20 @@ export default function UploadStep({ onDocxText, disabled, error }: Props) {
   );
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
-      <div className="max-w-lg w-full">
-        <h1 className="text-3xl font-bold text-center mb-2 text-gray-900">
-          DocuWise Tutorial Generator
-        </h1>
-        <p className="text-center text-gray-500 mb-8">
-          Naloži Word predlogo z Jinja tagi in prejmi navodila za konfiguracijo
-          intervjuja po korakih.
-        </p>
+    <div className="flex flex-col items-center justify-center h-full px-4">
+      <div className="max-w-md w-full">
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-cyan-50 mb-4">
+            <FileText className="w-7 h-7 text-cyan-600" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-1.5">
+            Tutorial Generator
+          </h1>
+          <p className="text-sm text-gray-500 leading-relaxed">
+            Naloži Word predlogo z Jinja tagi in prejmi<br />
+            navodila za konfiguracijo intervjuja po korakih.
+          </p>
+        </div>
 
         <div
           onDragOver={(e) => {
@@ -65,14 +70,14 @@ export default function UploadStep({ onDocxText, disabled, error }: Props) {
           onDrop={handleDrop}
           onClick={() => inputRef.current?.click()}
           className={`
-            border-2 border-dashed rounded-xl p-12 text-center cursor-pointer
-            transition-colors duration-200
+            border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer
+            transition-all duration-200
             ${
               dragOver
-                ? "border-blue-500 bg-blue-50"
-                : "border-gray-300 hover:border-blue-400 hover:bg-gray-50"
+                ? "border-cyan-400 bg-cyan-50 scale-[1.01]"
+                : "border-gray-200 hover:border-cyan-300 hover:bg-gray-50/50"
             }
-            ${disabled ? "opacity-50 pointer-events-none" : ""}
+            ${disabled ? "opacity-40 pointer-events-none" : ""}
           `}
         >
           <input
@@ -84,18 +89,22 @@ export default function UploadStep({ onDocxText, disabled, error }: Props) {
           />
 
           {fileName ? (
-            <div className="flex flex-col items-center gap-3">
-              <FileText className="w-12 h-12 text-blue-500" />
-              <p className="text-gray-700 font-medium">{fileName}</p>
-              <p className="text-sm text-gray-400">Klikni za zamenjavo</p>
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-10 h-10 rounded-xl bg-cyan-100 flex items-center justify-center">
+                <FileText className="w-5 h-5 text-cyan-600" />
+              </div>
+              <p className="text-sm font-medium text-gray-700">{fileName}</p>
+              <p className="text-xs text-gray-400">Klikni za zamenjavo</p>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-3">
-              <Upload className="w-12 h-12 text-gray-400" />
-              <p className="text-gray-600 font-medium">
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
+                <Upload className="w-5 h-5 text-gray-400" />
+              </div>
+              <p className="text-sm font-medium text-gray-600">
                 Povleci .docx sem ali klikni za izbiro
               </p>
-              <p className="text-sm text-gray-400">
+              <p className="text-xs text-gray-400">
                 Podprte so samo .docx datoteke
               </p>
             </div>
@@ -103,9 +112,9 @@ export default function UploadStep({ onDocxText, disabled, error }: Props) {
         </div>
 
         {error && (
-          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg flex gap-3">
-            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-red-700 whitespace-pre-wrap">{error}</p>
+          <div className="mt-4 p-3.5 bg-red-50 border border-red-100 rounded-xl flex gap-2.5">
+            <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-red-600 leading-relaxed whitespace-pre-wrap">{error}</p>
           </div>
         )}
       </div>
