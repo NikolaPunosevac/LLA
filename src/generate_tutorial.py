@@ -275,6 +275,7 @@ def generate_tutorial(data: dict) -> list[str]:
     # ------------------------------------------------------------------
 
     global_var_num = 0
+    first = pages[0]['title'] if pages else ''
     for page in pages:
         pid = page["page_id"]
         page_vars = vars_by_page.get(pid, [])
@@ -296,18 +297,23 @@ def generate_tutorial(data: dict) -> list[str]:
             steps.append("")
 
             substeps: list[str] = []
+            if pid - 1:
+                substeps.append(
+                    f"1. Na strani `{first}` Poišči spremenljivko `{vname}` in jo **premakni** na "
+                    f"stran `{page['title']}`."
+                )
+            else:
+                substeps.append(
+                    f"1. Poišči spremenljivko `{vname}`."
+                )
             substeps.append(
-                f"1. Poišči spremenljivko `{vname}` in jo **premakni** na "
-                f"stran `{page['title']}`."
-            )
-            substeps.append(
-                f"2. Nastavi tip na **{TYPE_LABELS.get(vtype, vtype)}**."
-            )
-            substeps.append(
-                f"3. Nastavi oznako (label) na:\n"
+                f"2. Nastavi oznako (label) na:\n"
                 f"   ```\n"
                 f"   {vlabel}\n"
                 f"   ```"
+            )
+            substeps.append(
+                f"3. Nastavi tip na **{TYPE_LABELS.get(vtype, vtype)}**."
             )
             if vreq:
                 substeps.append(f"4. Vklopi **Required**.")
