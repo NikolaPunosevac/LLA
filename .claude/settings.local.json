@@ -2,7 +2,15 @@
   "permissions": {
     "allow": [
       "Bash(find /c/Users/Uporabnik/Documents/programiranje/LLA -type d -not -path */.* -not -path */node_modules* -not -path */__pycache__*)",
-      "Bash(python -m pytest tests/test_generate_tutorial.py -q)"
+      "Bash(python -m pytest tests/test_generate_tutorial.py -q)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx vite:*)",
+      "Bash(python -c \"import py_compile; py_compile.compile\\(''websocketService.py'', doraise=True\\); print\\(''OK''\\)\")",
+      "Bash(pip install:*)",
+      "Bash(pip --version)",
+      "Bash(python -m pip install websockets openai)",
+      "Bash(python websocketService.py)"
     ]
   }
 }
