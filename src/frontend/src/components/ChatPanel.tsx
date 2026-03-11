@@ -5,6 +5,7 @@ import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
 import type { WSMessage } from "@/services/websocket";
 import { htmlToMarkdown } from "@/lib/htmlToMarkdown";
+import { parseEditCommand } from "@/lib/documentEditor";
 
 interface Message {
   id: string;
@@ -17,9 +18,10 @@ interface ChatPanelProps {
   sendGenerateTutorial: (json: string) => void;
   onMessage: (handler: (msg: WSMessage) => void) => () => void;
   documentContent?: string;
+  onDocumentEdit?: (command: string) => void;
 }
 
-const ChatPanel = ({ sendMessage, sendGenerateTutorial, onMessage, documentContent }: ChatPanelProps) => {
+const ChatPanel = ({ sendMessage, sendGenerateTutorial, onMessage, documentContent, onDocumentEdit }: ChatPanelProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -75,6 +77,24 @@ const ChatPanel = ({ sendMessage, sendGenerateTutorial, onMessage, documentConte
       } else if (msg.type === "response_end") {
         // Finalize the streaming message
         console.log("Stream ended, final content length:", streamingContentRef.current.length);
+        
+        // Check for edit commands in the response
+        if (onDocumentEdit && streamingContentRef.current) {
+          // Look for edit commands in the format [start-end]['text']
+          const editCommandRegex = /\[\d+-\d+\]\[['"](.*?)['"]\]/g;
+          const matches = Array.from(streamingContentRef.current.matchAll(editCommandRegex));
+          
+          // Apply all edit commands found
+          for (const match of matches) {
+            const fullMatch = match[0];
+            const edit = parseEditCommand(fullMatch);
+            if (edit) {
+              console.log("Found edit command:", fullMatch);
+              onDocumentEdit(fullMatch);
+            }
+          }
+        }
+        
         streamingMessageIdRef.current = null;
         streamingContentRef.current = "";
       } else if (msg.type === "tutorial_error") {
@@ -93,7 +113,7 @@ const ChatPanel = ({ sendMessage, sendGenerateTutorial, onMessage, documentConte
       }
     });
     return unsub;
-  }, [onMessage]);
+  }, [onMessage, onDocumentEdit]);
 
   const handleSend = useCallback(
     (text: string) => {

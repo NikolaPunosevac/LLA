@@ -101,6 +101,17 @@ async def handle_client(websocket, path):
                         await asyncio.sleep(0.001)  # 1ms delay - imperceptible but allows processing
                         logger.debug(f"Sent response chunk: {chunk}")
                     
+                    # TEST: Send edit command [1-5]['hello world'] on every message
+                    # This will be parsed by the frontend and applied to the document
+                    test_edit_command = "[1-5]['hello world']"
+                    logger.info(f"Sending test edit command: {test_edit_command}")
+                    edit_chunk_response = {
+                        "type": "response_chunk",
+                        "message": test_edit_command
+                    }
+                    await websocket.send(json.dumps(edit_chunk_response))
+                    await asyncio.sleep(0.001)
+                    
                     # Send response end signal
                     end_response = {
                         "type": "response_end",
