@@ -4,6 +4,7 @@ import { Trash2, FileUp } from "lucide-react";
 import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
 import type { WSMessage } from "@/services/websocket";
+import { htmlToMarkdown } from "@/lib/htmlToMarkdown";
 
 interface Message {
   id: string;
@@ -12,12 +13,13 @@ interface Message {
 }
 
 interface ChatPanelProps {
-  sendMessage: (msg: string) => void;
+  sendMessage: (msg: string, documentMarkdown?: string) => void;
   sendGenerateTutorial: (json: string) => void;
   onMessage: (handler: (msg: WSMessage) => void) => () => void;
+  documentContent?: string;
 }
 
-const ChatPanel = ({ sendMessage, sendGenerateTutorial, onMessage }: ChatPanelProps) => {
+const ChatPanel = ({ sendMessage, sendGenerateTutorial, onMessage, documentContent }: ChatPanelProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -100,9 +102,12 @@ const ChatPanel = ({ sendMessage, sendGenerateTutorial, onMessage }: ChatPanelPr
         { id: crypto.randomUUID(), role: "user", content: text },
       ]);
       setIsTyping(true);
-      sendMessage(text);
+      
+      // Convert document HTML to markdown if document content exists
+      const documentMarkdown = documentContent ? htmlToMarkdown(documentContent) : undefined;
+      sendMessage(text, documentMarkdown);
     },
-    [sendMessage]
+    [sendMessage, documentContent]
   );
 
   const handleUploadJson = useCallback(() => {
