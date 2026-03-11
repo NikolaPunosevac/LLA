@@ -81,6 +81,18 @@ export function htmlToMarkdown(html: string, addLineNumbers: boolean = false): s
         return `${children}\n`;
       case 'span':
         return children;
+      case 'table':
+        // Preserve table HTML as-is with a special marker
+        const tableHtml = element.outerHTML;
+        return `__HTML_TABLE_START__\n${tableHtml}\n__HTML_TABLE_END__\n\n`;
+      case 'thead':
+      case 'tbody':
+      case 'tfoot':
+      case 'tr':
+      case 'td':
+      case 'th':
+        // These are handled by the table parent, but if encountered standalone, preserve
+        return children;
       default:
         return children;
     }

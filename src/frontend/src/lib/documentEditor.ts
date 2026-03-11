@@ -104,8 +104,35 @@ function markdownToHtml(markdown: string): string {
     }
   }
   
+  // Track if we're inside a preserved HTML table block
+  let inTableBlock = false;
+  let tableBlockLines: string[] = [];
+  
   for (let i = 0; i < lines.length; i++) {
     let line = lines[i];
+    
+    // Check for table block markers
+    if (line.trim() === '__HTML_TABLE_START__') {
+      inTableBlock = true;
+      tableBlockLines = [];
+      continue;
+    }
+    
+    if (line.trim() === '__HTML_TABLE_END__') {
+      inTableBlock = false;
+      // Restore the preserved table HTML
+      const tableHtml = tableBlockLines.join('\n');
+      closeList();
+      htmlLines.push(tableHtml);
+      tableBlockLines = [];
+      continue;
+    }
+    
+    if (inTableBlock) {
+      tableBlockLines.push(line);
+      continue;
+    }
+    
     // Remove line number labels in format (N | text)
     // Pattern: (number | text) - find the pipe and extract text after it, removing trailing )
     if (line.startsWith('(') && line.includes(' | ')) {
