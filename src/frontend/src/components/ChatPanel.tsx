@@ -18,7 +18,7 @@ interface ChatPanelProps {
   sendGenerateTutorial: (json: string) => void;
   onMessage: (handler: (msg: WSMessage) => void) => () => void;
   documentContent?: string;
-  onDocumentEdit?: (command: string) => void;
+  onDocumentEdit?: (command: string | { start: number; end: number; text: string }) => void;
 }
 
 const ChatPanel = ({ sendMessage, sendGenerateTutorial, onMessage, documentContent, onDocumentEdit }: ChatPanelProps) => {
@@ -74,26 +74,24 @@ const ChatPanel = ({ sendMessage, sendGenerateTutorial, onMessage, documentConte
             hasMessage: !!msg.message
           });
         }
+      } else if (msg.type === "edit_word") {
+        // Handle edit_word message from backend
+        if (onDocumentEdit && msg.start_line !== undefined && msg.end_line !== undefined && msg.message !== undefined) {
+          console.log("Received edit_word message:", {
+            start_line: msg.start_line,
+            end_line: msg.end_line,
+            message_length: msg.message.length
+          });
+          // Call onDocumentEdit with the edit data
+          onDocumentEdit({
+            start: msg.start_line,
+            end: msg.end_line,
+            text: msg.message
+          });
+        }
       } else if (msg.type === "response_end") {
         // Finalize the streaming message
         console.log("Stream ended, final content length:", streamingContentRef.current.length);
-        
-        // Check for edit commands in the response
-        if (onDocumentEdit && streamingContentRef.current) {
-          // Look for edit commands in the format [start-end]['text']
-          const editCommandRegex = /\[\d+-\d+\]\[['"](.*?)['"]\]/g;
-          const matches = Array.from(streamingContentRef.current.matchAll(editCommandRegex));
-          
-          // Apply all edit commands found
-          for (const match of matches) {
-            const fullMatch = match[0];
-            const edit = parseEditCommand(fullMatch);
-            if (edit) {
-              console.log("Found edit command:", fullMatch);
-              onDocumentEdit(fullMatch);
-            }
-          }
-        }
         
         streamingMessageIdRef.current = null;
         streamingContentRef.current = "";
@@ -123,8 +121,9 @@ const ChatPanel = ({ sendMessage, sendGenerateTutorial, onMessage, documentConte
       ]);
       setIsTyping(true);
       
-      // Convert document HTML to markdown if document content exists
-      const documentMarkdown = documentContent ? htmlToMarkdown(documentContent) : undefined;
+      // Convert document HTML to markdown with line numbers if document content exists
+      // Line numbers help the LLM identify which lines to edit
+      const documentMarkdown = documentContent ? htmlToMarkdown(documentContent, true) : undefined;
       sendMessage(text, documentMarkdown);
     },
     [sendMessage, documentContent]

@@ -3,6 +3,7 @@ import { htmlToMarkdown } from "./htmlToMarkdown";
 /**
  * Parse an edit command in the format [start-end]['replacement text']
  * Example: [60-70]['new text'] or [1-5]['hello world']
+ * @deprecated Use edit object directly instead
  */
 export function parseEditCommand(command: string): { start: number; end: number; text: string } | null {
   // Match pattern: [start-end]['text']
@@ -23,16 +24,30 @@ export function parseEditCommand(command: string): { start: number; end: number;
 }
 
 /**
+ * Edit command format - can be either a string (legacy) or an object (new format)
+ */
+export type EditCommand = string | { start: number; end: number; text: string };
+
+/**
  * Convert HTML to markdown, split into lines, apply edit, convert back to HTML
  */
-export function applyEditCommand(htmlContent: string, command: string): string {
-  const edit = parseEditCommand(command);
+export function applyEditCommand(htmlContent: string, command: EditCommand): string {
+  // Handle both string format (legacy) and object format (new)
+  let edit: { start: number; end: number; text: string } | null;
+  
+  if (typeof command === 'string') {
+    edit = parseEditCommand(command);
+  } else {
+    edit = command;
+  }
+  
   if (!edit) {
+    console.warn("Invalid edit command:", command);
     return htmlContent; // Invalid command, return unchanged
   }
   
-  // Convert HTML to markdown
-  const markdown = htmlToMarkdown(htmlContent);
+  // Convert HTML to markdown (without line numbers for editing)
+  const markdown = htmlToMarkdown(htmlContent, false);
   
   // Split into lines (1-indexed for user convenience)
   const lines = markdown.split('\n');
@@ -60,9 +75,7 @@ export function applyEditCommand(htmlContent: string, command: string): string {
   // Join back and convert markdown to HTML
   const newMarkdown = newLines.join('\n');
   
-  // Convert markdown back to HTML
-  // For now, we'll use a simple approach: create a temporary element
-  // In a production app, you might want to use a proper markdown-to-HTML library
+  // Convert markdown back to HTML (markdownToHtml will remove any line number labels if present)
   return markdownToHtml(newMarkdown);
 }
 
@@ -92,7 +105,25 @@ function markdownToHtml(markdown: string): string {
   }
   
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
+    let line = lines[i];
+    // Remove line number labels in format (N | text)
+    // Pattern: (number | text) - find the pipe and extract text after it, removing trailing )
+    if (line.startsWith('(') && line.includes(' | ')) {
+      const pipeIndex = line.indexOf(' | ');
+      if (pipeIndex > 0) {
+        // Extract number part to verify it's a line number
+        const numberPart = line.substring(1, pipeIndex).trim();
+        if (/^\d+$/.test(numberPart)) {
+          // Extract text after pipe, remove trailing )
+          const textPart = line.substring(pipeIndex + 3); // +3 for ' | '
+          if (textPart.endsWith(')')) {
+            line = textPart.slice(0, -1); // Remove trailing )
+          } else {
+            line = textPart;
+          }
+        }
+      }
+    }
     const trimmed = line.trim();
     
     if (!trimmed) {

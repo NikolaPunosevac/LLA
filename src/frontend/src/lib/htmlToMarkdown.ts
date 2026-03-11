@@ -1,8 +1,11 @@
 /**
  * Converts HTML content to Markdown format
  * Handles common HTML elements: headings, paragraphs, bold, italic, lists, etc.
+ * 
+ * @param html - HTML content to convert
+ * @param addLineNumbers - If true, adds line numbers in format (N | text)
  */
-export function htmlToMarkdown(html: string): string {
+export function htmlToMarkdown(html: string, addLineNumbers: boolean = false): string {
   // Create a temporary DOM element to parse HTML
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = html;
@@ -83,12 +86,24 @@ export function htmlToMarkdown(html: string): string {
     }
   }
   
-  const markdown = Array.from(tempDiv.childNodes)
+  let markdown = Array.from(tempDiv.childNodes)
     .map(processNode)
     .join('');
   
   // Clean up extra newlines
-  return markdown
+  markdown = markdown
     .replace(/\n{3,}/g, '\n\n')
     .trim();
+  
+  // Add line numbers if requested
+  if (addLineNumbers) {
+    const lines = markdown.split('\n');
+    const numberedLines = lines.map((line, index) => {
+      const lineNum = index + 1;
+      return `(${lineNum} | ${line})`;
+    });
+    return numberedLines.join('\n');
+  }
+  
+  return markdown;
 }

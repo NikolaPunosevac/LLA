@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from websockets.server import serve
 from websockets.exceptions import ConnectionClosed
-from LLMclass import LLM
+from LLMclassEdditor import LLM
 
 # Allow importing generate_tutorial from sibling directory
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -63,8 +63,8 @@ async def handle_client(websocket, path):
         await websocket.close(code=1008, reason="Invalid path")
         return
 
-    llm = LLM()
-    # Store document markdown per connection (not yet used in LLM calls)
+    # LLM will be initialized per message based on whether document is provided
+    # Store document markdown per connection
     document_markdown = None
     
     try:
@@ -82,10 +82,26 @@ async def handle_client(websocket, path):
                 # Handle chat messages
                 if data["type"] == "chat":
                     user_message = data["message"]
-                    # Extract document markdown if provided (not yet used in LLM calls)
+                    # Extract document markdown if provided
                     document_markdown = data.get("documentMarkdown")
+                    
+                    # Initialize LLM with document editing prompt if document is provided
                     if document_markdown:
-                        logger.info(f"Received document markdown ({len(document_markdown)} chars), stored but not yet used in LLM calls")
+                        logger.info(f"Received document markdown ({len(document_markdown)} chars), using document editing mode")
+                        llm = LLM(use_document_editing_prompt=True)
+                        # Add document context to the user message
+                        user_message_with_doc = f"""Tukaj je vsebina dokumenta v markdown formatu:
+
+{document_markdown}
+
+---
+
+Odvetnik zahteva:
+{user_message}"""
+                    else:
+                        llm = LLM()
+                        user_message_with_doc = user_message
+                    
                     logger.info(f"Processing chat message: {user_message}")
                     
                     # Send response start signal
@@ -96,10 +112,17 @@ async def handle_client(websocket, path):
                     await websocket.send(json.dumps(start_response))
                     logger.info("Sent response_start signal")
                     
+                    # Collect all streamed chunks into a string
+                    full_response = ""
+                    
                     # Get LLM response with streaming
-                    llm_response = llm.respond(user_message, stream=True)
+                    llm_response = llm.respond(user_message_with_doc, stream=True)
                     for chunk in llm_response:
                         print(chunk)
+                        # Accumulate chunks for parsing
+                        full_response += chunk
+                        
+                        # Send chunk to frontend for display
                         chunk_response = {
                             "type": "response_chunk",
                             "message": chunk
@@ -110,16 +133,34 @@ async def handle_client(websocket, path):
                         await asyncio.sleep(0.001)  # 1ms delay - imperceptible but allows processing
                         logger.debug(f"Sent response chunk: {chunk}")
                     
-                    # TEST: Send edit command [1-5]['hello world'] on every message
-                    # This will be parsed by the frontend and applied to the document
-                    test_edit_command = "[1-5]['hello world']"
-                    logger.info(f"Sending test edit command: {test_edit_command}")
-                    edit_chunk_response = {
-                        "type": "response_chunk",
-                        "message": test_edit_command
-                    }
-                    await websocket.send(json.dumps(edit_chunk_response))
-                    await asyncio.sleep(0.001)
+                    # Parse for edit commands in format %$[start-end]['text']%$ or %$[start-end]["text"]%$
+                    # Pattern matches: %$[number-number]['text']%$ or %$[number-number]["text"]%$
+                    # Handle both single and double quotes, with multiline support
+                    # Use non-greedy match to capture everything until ']%$ or "]%$
+                    edit_pattern_single = r'%\$\[(\d+)-(\d+)\]\[\'(.*?)\'\]%\$'
+                    edit_pattern_double = r'%\$\[(\d+)-(\d+)\]\[\"(.*?)\"\]%\$'
+                    
+                    edit_matches = []
+                    # Find matches with single quotes (with DOTALL to handle newlines)
+                    for match in re.finditer(edit_pattern_single, full_response, re.DOTALL):
+                        edit_matches.append((match.group(1), match.group(2), match.group(3)))
+                    # Find matches with double quotes (with DOTALL to handle newlines)
+                    for match in re.finditer(edit_pattern_double, full_response, re.DOTALL):
+                        edit_matches.append((match.group(1), match.group(2), match.group(3)))
+                    
+                    if edit_matches:
+                        logger.info(f"Found {len(edit_matches)} edit command(s) in response")
+                        # Send each edit command as a separate message
+                        for start_line, end_line, replacement_text in edit_matches:
+                            logger.info(f"Sending edit command: lines {start_line}-{end_line}, text length: {len(replacement_text)}")
+                            edit_chunk_response = {
+                                "type": "edit_word",
+                                "message": replacement_text,
+                                "start_line": int(start_line),
+                                "end_line": int(end_line)
+                            }
+                            await websocket.send(json.dumps(edit_chunk_response))
+                            await asyncio.sleep(0.001)
                     
                     # Send response end signal
                     end_response = {
